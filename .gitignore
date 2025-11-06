@@ -1,0 +1,45 @@
+
+# Python cache / build
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+dist/
+build/
+*.spec
+
+# Poetry / virtualenv
+.venv/
+.poetry/
+poetry.lock
+
+# Pytest / coverage
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+*.swp
+*.swo
+
+# Env files
+.env
+.env.*
+config/env/.env.local
+
+# Docker
+docker/*.log
+docker/postgres_data/
+docker/minio_data/
+
+# Temporal / runtime
+temporal/.cache/
+
