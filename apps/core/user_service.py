@@ -23,6 +23,8 @@ class InMemoryUserService:
             role="admin",
         )
         self._users[admin.email] = admin
+        # Псевдоним для упрощенного логина без домена
+        self._users.setdefault("admin", admin)
 
     def get_user_by_email(self, email: str) -> User | None:
         return self._users.get(email)

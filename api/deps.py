@@ -10,8 +10,10 @@ from config.settings import settings
 from domain.models.user import Role, User
 from infrastructure.auth.security import verify_password
 from apps.core.user_service import user_service
+from config.logging import get_logger
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/token")
+logger = get_logger(__name__)
 
 
 async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
@@ -49,9 +51,15 @@ def require_roles(*roles: Role):
 
 async def authenticate_user(email: str, password: str) -> User | None:
     user = user_service.get_user_by_email(email)
-    if user and verify_password(password, user.hashed_password):
-        return user
-    return None
+    if not user:
+        logger.info("auth_user_not_found", email=email)
+        return None
+    ok = verify_password(password, user.hashed_password)
+    if not ok:
+        logger.info("auth_password_mismatch", email=email)
+        return None
+    logger.info("auth_success", email=email, role=user.role)
+    return user
 
 
 async def create_token_for_user(user: User) -> str:

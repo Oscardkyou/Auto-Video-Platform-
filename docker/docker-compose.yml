@@ -12,6 +12,11 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres -h 127.0.0.1 -p 5432"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
 
   minio:
     image: minio/minio:latest
@@ -31,15 +36,19 @@ services:
     restart: unless-stopped
     environment:
       DB: postgres12
+      # Переменные для postgres backend
       POSTGRES_USER: postgres
       POSTGRES_PWD: postgres
       POSTGRES_SEEDS: postgres
+      DB_PORT: 5432
       POSTGRES_PORT: 5432
+      POSTGRES_DB: postgres
     ports:
       - "7233:7233"
       - "8233:8233"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
 
   temporal-ui:
     image: temporalio/ui:2.27.2

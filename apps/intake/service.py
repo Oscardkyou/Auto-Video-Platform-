@@ -1,48 +1,48 @@
 from __future__ import annotations
 
-from datetime import datetime
-from typing import Dict, List
-from uuid import uuid4
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.schemas.intake import BriefCreateRequest
+from apps.intake.models import Brief
 from domain.models.user import User
-from pydantic import BaseModel
 
 
-class Brief(BaseModel):
-    id: str
-    campaign_name: str
-    objective: str
-    target_audience: str
-    launch_date: datetime
-    budget: float
-    status: str = "received"
-    created_by: str
-    created_at: datetime
+class IntakeServiceDB:
+    """Сервис брифов на PostgreSQL (async SQLAlchemy)."""
 
-
-class IntakeService:
-    """Простейший in-memory сервис брифов."""
-
-    def __init__(self) -> None:
-        self._briefs: Dict[str, Brief] = {}
-
-    def create_brief(self, payload: BriefCreateRequest, user: User) -> Brief:
+    async def create_brief(self, session: AsyncSession, payload: BriefCreateRequest, user: User) -> Brief:
         brief = Brief(
-            id=str(uuid4()),
             campaign_name=payload.campaign_name,
             objective=payload.objective,
             target_audience=payload.target_audience,
             launch_date=payload.launch_date,
             budget=payload.budget,
             created_by=user.email,
-            created_at=datetime.utcnow(),
         )
-        self._briefs[brief.id] = brief
+        session.add(brief)
+        await session.commit()
+        await session.refresh(brief)
         return brief
 
-    def list_briefs(self) -> List[Brief]:
-        return list(self._briefs.values())
+    async def list_briefs(self, session: AsyncSession) -> list[Brief]:
+        result = await session.execute(select(Brief).order_by(Brief.created_at.desc()))
+        return list(result.scalars().all())
+
+    async def get_brief(self, session: AsyncSession, brief_id: str) -> Brief | None:
+        return await session.get(Brief, brief_id)
+
+    async def update_brief(self, session: AsyncSession, brief: Brief, **fields) -> Brief:
+        for k, v in fields.items():
+            if v is not None:
+                setattr(brief, k, v)
+        await session.commit()
+        await session.refresh(brief)
+        return brief
+
+    async def delete_brief(self, session: AsyncSession, brief: Brief) -> None:
+        await session.delete(brief)
+        await session.commit()
 
 
-intake_service = IntakeService()
+intake_service = IntakeServiceDB()

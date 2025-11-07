@@ -1,45 +1,66 @@
-
-# Python cache / build
+## Python bytecode
 __pycache__/
 *.py[cod]
 *.pyo
 *.pyd
 *.so
-*.egg-info/
-dist/
-build/
-*.spec
+*.dylib
 
-# Poetry / virtualenv
+## Virtual environments
 .venv/
-.poetry/
-poetry.lock
+venv/
+env/
+ENV/
 
-# Pytest / coverage
+## Build artifacts
+build/
+dist/
+*.egg-info/
+.eggs/
+
+## Caches & tooling
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+.pyre/
+.cache/
+.tox/
 .coverage
+.coverage.*
 coverage.xml
 htmlcov/
 
-# IDE / OS
-.idea/
+## IDE/project files
 .vscode/
-.DS_Store
-*.swp
-*.swo
+.idea/
+*.code-workspace
 
-# Env files
+## OS files
+.DS_Store
+Thumbs.db
+
+## Notebooks
+.ipynb_checkpoints/
+
+## Logs & temp
+logs/
+*.log
+tmp/
+temp/
+
+## Environment files
 .env
 .env.*
-config/env/.env.local
+!.env.example
 
-# Docker
-docker/*.log
-docker/postgres_data/
-docker/minio_data/
+## Docker/local overrides
+.docker/
+docker/.env
+docker/*.local.*
+**/docker-compose.override.yml
 
-# Temporal / runtime
-temporal/.cache/
-
+## App data (local-only)
+data/
+downloads/
+uploads/
+media/
